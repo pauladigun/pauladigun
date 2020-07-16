@@ -1,0 +1,22 @@
+#import dataset data<-read.csv(file.choose(),header=T) 
+# Scaling data for the Neural network model [0,1] i.e x’=(x-a)/(b-a)
+maxs <- apply(data, 2, max) 
+mins <- apply(data, 2, min)
+scaled <- as.data.frame(scale(data, center = mins, scale = maxs - mins)) 
+#Split data into 2 subset(train and test)
+test=>2014-2017 train=>1986-2013 train<-scaled[1:140,] test<-scaled[141:160,]
+#loading neural network library library(neuralnet)
+#creating formula that connect input and target
+n <- names(train) f <- as.formula(paste("RAINFALL ~", paste(n[!n %in% "RAINFALL"], collapse = " + "))) #training the neural network
+nn <- neuralnet (f, data=train, hidden=c(4,1),linear.output=T) 
+# Visual plot of the model plot(nn)
+# Predict the test data (2014-2017) pr.nn <- compute(nn, test[,2:9]) 
+pr.nn$net.result # Results from NN are normalized (scaled) 
+# Descaling for comparison 
+pr.nn_ <- pr.nn$net.result*(max(data$RAINFALL)-min(data$RAINFALL))+min(data$RAINFALL) test.r <- (test$RAINFALL)*(max(data$RAINFALL)-min(data$RAINFALL))+min(data$RAINFALL) 
+# correlation between predicted nn result and observed
+actual_pred<-data.frame(pred<-pr.nn$net.result,actual<-test$RAINFALL) 
+cor(actual_pred) # Calculating Mean square error
+(MSE) MSE.nn <- sum((test.r - pr.nn_)^2)/nrow(test) RMSE<-sqrt(MSE.nn) 
+MAE<-sum((test.r - pr.nn_))/nrow(test)
+
